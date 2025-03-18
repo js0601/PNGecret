@@ -1,3 +1,109 @@
+use std::{error::Error, fmt::Display, str::FromStr};
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ChunkType {
+    bytes: [u8; 4],
+}
+
+// methods for checking properties of chunk type
+// see section 3.3 of PNG spec for more detailed info
+//
+// the 5th bit of every byte has a specific meaning
+// this could be checked by checking if the byte is an uppercase (bit 5 is 0)
+// or lowercase (bit 5 is 1) ASCII char, but the spec says that's incorrect to do so I check the bits manually
+#[allow(dead_code)] // NOTE: needed?
+impl ChunkType {
+    pub fn bytes(&self) -> [u8; 4] {
+        self.bytes
+    }
+
+    // NOTE: does this need to exist?
+    pub fn is_valid(&self) -> bool {
+        self.is_reserved_bit_valid()
+    }
+
+    // bit 5 of byte 1 decides if the chunk is critical (0) or ancillary (1) (safe to ignore)
+    pub fn is_critical(&self) -> bool {
+        (self.bytes[0] & (1 << 5)) == 0
+    }
+
+    // bit 5 of byte 2 decides if chunk is public (0) or private (1)
+    pub fn is_public(&self) -> bool {
+        (self.bytes[1] & (1 << 5)) == 0
+    }
+
+    // bit 5 of byte 3 is reserved and should always be 0
+    pub fn is_reserved_bit_valid(&self) -> bool {
+        (self.bytes[2] & (1 << 5)) == 0
+    }
+
+    // bit 5 of byte 4 decides if chunk is unsafe (0) or safe (1) to copy
+    pub fn is_safe_to_copy(&self) -> bool {
+        (self.bytes[3] & (1 << 5)) != 0
+    }
+}
+
+impl TryFrom<[u8; 4]> for ChunkType {
+    type Error = crate::Error;
+
+    fn try_from(bytes: [u8; 4]) -> Result<Self, Self::Error> {
+        for b in bytes {
+            if !b.is_ascii_alphabetic() {
+                return Err(Box::new(ChunkTypeError::NonAsciiAlphabeticByte(b)));
+            }
+        }
+        Ok(ChunkType { bytes })
+    }
+}
+
+impl FromStr for ChunkType {
+    type Err = crate::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 4 {
+            return Err(Box::new(ChunkTypeError::BadLength(s.len())));
+        }
+        let bytes = s.as_bytes();
+        for b in bytes {
+            if !b.is_ascii_alphabetic() {
+                return Err(Box::new(ChunkTypeError::NonAsciiAlphabeticByte(*b)));
+            }
+        }
+        Ok(ChunkType {
+            bytes: bytes.try_into()?,
+        })
+    }
+}
+
+impl Display for ChunkType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", std::str::from_utf8(&self.bytes).unwrap())
+    }
+}
+
+// Error type for nicer error messages
+#[derive(Debug)]
+enum ChunkTypeError {
+    // byte is not an ascii alphabetic character
+    NonAsciiAlphabeticByte(u8),
+    // type is not 4 ascii characters long
+    BadLength(usize),
+}
+
+impl Display for ChunkTypeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ChunkTypeError::NonAsciiAlphabeticByte(byte) => write!(
+                f,
+                "Non-ASCII or non-alphabetic byte: {byte} ({byte:b}) is not a valid character"
+            ),
+            ChunkTypeError::BadLength(l) => write!(f, "Bad chunk type length: {l} (must be 4)"),
+        }
+    }
+}
+
+impl Error for ChunkTypeError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
