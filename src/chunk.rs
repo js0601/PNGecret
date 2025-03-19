@@ -1,5 +1,8 @@
 use crc::Crc;
-use std::fmt::Display;
+use std::{
+    fmt::Display,
+    io::{BufReader, Read},
+};
 
 use crate::chunk_type::ChunkType;
 
@@ -51,16 +54,43 @@ impl Chunk {
         self.crc
     }
 
-    fn data_as_string(&self) -> Result<String> {}
+    fn data_as_string(&self) -> crate::Result<String> {
+        todo!()
+    }
 
-    fn as_bytes(&self) -> Vec<u8> {}
+    fn as_bytes(&self) -> Vec<u8> {
+        todo!()
+    }
 }
 
 impl TryFrom<&[u8]> for Chunk {
-    type Error;
+    type Error = crate::Error;
 
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+        let mut reader = BufReader::new(bytes);
+
+        // first 4 bytes should be length
+        let mut length_buf = [0; 4];
+        reader.read_exact(&mut length_buf)?;
+        let length = <u32>::from_be_bytes(length_buf);
+
+        // next 4 bytes should be the chunk type
+        let mut ctype_buf = [0; 4];
+        reader.read_exact(&mut ctype_buf)?;
+        let chunk_type = ChunkType::try_from(ctype_buf)?;
+
+        // read rest, then take last 4 bytes as crc and rest as data
+        let mut rest_buf = vec![];
+        reader.read_to_end(&mut rest_buf)?;
+        let data = rest_buf[..rest_buf.len() - 4].to_vec();
+        let crc = <u32>::from_be_bytes(rest_buf[rest_buf.len() - 4..].try_into()?);
+
+        Ok(Chunk {
+            length,
+            chunk_type,
+            data,
+            crc,
+        })
     }
 }
 
