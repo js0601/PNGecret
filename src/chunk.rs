@@ -17,6 +17,8 @@ pub struct Chunk {
 
 impl Chunk {
     fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
+        // NOTE: if the message is longer than 4.2 million characters this will panic
+        // but unless you are going to encode War and Peace ~1.4 times this shouldn't happen
         let length = data
             .len()
             .try_into()
@@ -33,13 +35,21 @@ impl Chunk {
         }
     }
 
-    fn length(&self) -> u32 {}
+    fn length(&self) -> u32 {
+        self.length
+    }
 
-    fn chunk_type(&self) -> &ChunkType {}
+    fn chunk_type(&self) -> &ChunkType {
+        &self.chunk_type
+    }
 
-    fn data(&self) -> &[u8] {}
+    fn data(&self) -> &[u8] {
+        &self.data
+    }
 
-    fn crc(&self) -> u32 {}
+    fn crc(&self) -> u32 {
+        self.crc
+    }
 
     fn data_as_string(&self) -> Result<String> {}
 
