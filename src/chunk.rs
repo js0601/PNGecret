@@ -2,7 +2,12 @@ use std::fmt::Display;
 
 use crate::chunk_type::ChunkType;
 
-pub struct Chunk {}
+pub struct Chunk {
+    length: u32,
+    ctype: ChunkType,
+    data: Vec<u8>,
+    crc: u32,
+}
 
 impl Chunk {
     fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {}
