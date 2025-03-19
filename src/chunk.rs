@@ -55,7 +55,7 @@ impl Chunk {
     }
 
     fn data_as_string(&self) -> crate::Result<String> {
-        todo!()
+        Ok(<String>::from_utf8(self.data().to_vec())?)
     }
 
     fn as_bytes(&self) -> Vec<u8> {
@@ -96,7 +96,12 @@ impl TryFrom<&[u8]> for Chunk {
 
 impl Display for Chunk {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        write!(
+            f,
+            "{}\t{}",
+            self.chunk_type,
+            self.data_as_string().unwrap_or("[data]".to_string())
+        )
     }
 }
 
