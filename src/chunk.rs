@@ -1,16 +1,37 @@
+use crc::Crc;
 use std::fmt::Display;
 
 use crate::chunk_type::ChunkType;
 
+const CRC_PNG: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_ISO_HDLC);
+
 pub struct Chunk {
+    // length of ONLY the data field
     length: u32,
-    ctype: ChunkType,
+    chunk_type: ChunkType,
+    // can be of zero length
     data: Vec<u8>,
+    // CRC including type and data but NOT length
     crc: u32,
 }
 
 impl Chunk {
-    fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {}
+    fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
+        let length = data
+            .len()
+            .try_into()
+            .expect("Your message is too long, what the hell are you trying to hide");
+        let mut msg = chunk_type.bytes().to_vec();
+        msg.extend_from_slice(&data);
+        let crc = CRC_PNG.checksum(&msg);
+
+        Chunk {
+            length,
+            chunk_type,
+            data,
+            crc,
+        }
+    }
 
     fn length(&self) -> u32 {}
 
