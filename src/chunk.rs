@@ -1,5 +1,6 @@
 use crc::Crc;
 use std::{
+    error::Error,
     fmt::Display,
     io::{BufReader, Read},
 };
@@ -18,6 +19,7 @@ pub struct Chunk {
     crc: u32,
 }
 
+#[allow(dead_code)] // NOTE: needed?
 impl Chunk {
     fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         // NOTE: if the message is longer than 4.2 million characters this will panic
@@ -85,12 +87,17 @@ impl TryFrom<&[u8]> for Chunk {
         let data = rest_buf[..rest_buf.len() - 4].to_vec();
         let crc = <u32>::from_be_bytes(rest_buf[rest_buf.len() - 4..].try_into()?);
 
-        Ok(Chunk {
-            length,
-            chunk_type,
-            data,
-            crc,
-        })
+        // create new chunk to see if length and CRC checksum are correct
+        // the chunk type is already valid here, since the try_from succeeded
+        let chunk = Chunk::new(chunk_type, data);
+        if length != chunk.length() {
+            return Err(Box::new(ChunkError::BadLength(length)));
+        }
+        if crc != chunk.crc() {
+            return Err(Box::new(ChunkError::BadChecksum(crc)));
+        }
+
+        Ok(chunk)
     }
 }
 
@@ -104,6 +111,23 @@ impl Display for Chunk {
         )
     }
 }
+
+#[derive(Debug)]
+enum ChunkError {
+    BadLength(u32),
+    BadChecksum(u32),
+}
+
+impl Display for ChunkError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ChunkError::BadLength(l) => write!(f, "Chunk has an incorrect length: {l}"),
+            ChunkError::BadChecksum(s) => write!(f, "Chunk has an incorrect checksum: {s}"),
+        }
+    }
+}
+
+impl Error for ChunkError {}
 
 #[cfg(test)]
 mod tests {
