@@ -19,7 +19,6 @@ pub struct Chunk {
     crc: u32,
 }
 
-#[allow(dead_code)] // NOTE: needed?
 impl Chunk {
     pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         // NOTE: if the message is longer than 4.2 million characters this will panic
