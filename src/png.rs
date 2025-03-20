@@ -1,4 +1,8 @@
-use std::fmt::Display;
+use std::{
+    error::Error,
+    fmt::Display,
+    io::{BufReader, Read},
+};
 
 use crate::chunk::Chunk;
 
@@ -43,8 +47,34 @@ impl Png {
 impl TryFrom<&[u8]> for Png {
     type Error = crate::Error;
 
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+        let mut reader = BufReader::new(bytes);
+
+        let mut header_buf = [0; 8];
+        reader.read_exact(&mut header_buf)?;
+        if header_buf != Png::STANDARD_HEADER {
+            return Err(Box::new(PngError::BadHeader));
+        }
+
+        let mut chunks: Vec<Chunk> = Vec::new();
+        // length of entire chunk is 4 (length) + 4 (type) + length (data) + 4 (crc)
+        let mut length_buf = [0; 4];
+        while reader.read_exact(&mut length_buf).is_ok() {
+            // read 4 + length + 4 more bytes to read rest of chunk
+            let length_of_chunk = 4 + <u32>::from_be_bytes(length_buf) + 4;
+            let mut rest_buf = vec![0; <usize>::try_from(length_of_chunk)?];
+            reader.read_exact(&mut rest_buf)?;
+
+            // add length and rest, then create Chunk and add it to list
+            let chunk_bytes: Vec<u8> = length_buf.iter().chain(rest_buf.iter()).copied().collect();
+            let chunk = Chunk::try_from(chunk_bytes.as_slice())?;
+            chunks.push(chunk);
+        }
+
+        Ok(Png {
+            header: Png::STANDARD_HEADER,
+            chunks,
+        })
     }
 }
 
@@ -53,6 +83,21 @@ impl Display for Png {
         todo!()
     }
 }
+
+#[derive(Debug)]
+enum PngError {
+    BadHeader,
+}
+
+impl Display for PngError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PngError::BadHeader => write!(f, "This PNG has a faulty header"),
+        }
+    }
+}
+
+impl Error for PngError {}
 
 #[cfg(test)]
 mod tests {
