@@ -2,10 +2,9 @@ use std::{
     error::Error,
     fmt::Display,
     io::{BufReader, Read},
-    ops::Index,
 };
 
-use crate::{chunk::Chunk, chunk_type::ChunkType};
+use crate::chunk::Chunk;
 
 pub struct Png {
     header: [u8; 8],
@@ -137,7 +136,6 @@ mod tests {
     use crate::chunk::Chunk;
     use crate::chunk_type::ChunkType;
     use std::convert::TryFrom;
-    use std::str::FromStr;
 
     fn testing_chunks() -> Vec<Chunk> {
         vec![
