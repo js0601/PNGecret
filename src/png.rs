@@ -61,7 +61,12 @@ impl Png {
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
-        todo!()
+        let chunks_as_bytes: Vec<u8> = self.chunks.iter().flat_map(|c| c.as_bytes()).collect();
+        self.header
+            .iter()
+            .chain(chunks_as_bytes.iter())
+            .copied()
+            .collect()
     }
 }
 
