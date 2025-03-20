@@ -2,8 +2,12 @@ use std::fmt::Display;
 
 use crate::chunk::Chunk;
 
-pub struct Png {}
+pub struct Png {
+    header: [u8; 8],
+    chunks: Vec<Chunk>,
+}
 
+#[allow(dead_code)] // NOTE: needed?
 impl Png {
     pub const STANDARD_HEADER: [u8; 8] = [137, 80, 78, 71, 13, 10, 26, 10];
 
@@ -20,11 +24,11 @@ impl Png {
     }
 
     pub fn header(&self) -> &[u8; 8] {
-        todo!()
+        &self.header
     }
 
     pub fn chunks(&self) -> &[Chunk] {
-        todo!()
+        &self.chunks
     }
 
     pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
