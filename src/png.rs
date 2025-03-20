@@ -2,9 +2,10 @@ use std::{
     error::Error,
     fmt::Display,
     io::{BufReader, Read},
+    ops::Index,
 };
 
-use crate::chunk::Chunk;
+use crate::{chunk::Chunk, chunk_type::ChunkType};
 
 pub struct Png {
     header: [u8; 8],
@@ -27,7 +28,16 @@ impl Png {
     }
 
     pub fn remove_first_chunk(&mut self, chunk_type: &str) -> crate::Result<Chunk> {
-        todo!()
+        if let Some(chunk) = self.chunk_by_type(chunk_type) {
+            let chunk_idx = self
+                .chunks
+                .iter()
+                .position(|c| c.chunk_type() == chunk.chunk_type())
+                .unwrap();
+            Ok(self.chunks.remove(chunk_idx))
+        } else {
+            Err(Box::new(PngError::ChunkNotFound(chunk_type.to_string())))
+        }
     }
 
     pub fn header(&self) -> &[u8; 8] {
@@ -102,12 +112,14 @@ impl Display for Png {
 #[derive(Debug)]
 enum PngError {
     BadHeader,
+    ChunkNotFound(String),
 }
 
 impl Display for PngError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PngError::BadHeader => write!(f, "This PNG has a faulty header"),
+            PngError::ChunkNotFound(ct) => write!(f, "No chunk with type {ct} in PNG"),
         }
     }
 }
