@@ -16,7 +16,10 @@ impl Png {
     pub const STANDARD_HEADER: [u8; 8] = [137, 80, 78, 71, 13, 10, 26, 10];
 
     pub fn from_chunks(chunks: Vec<Chunk>) -> Self {
-        todo!()
+        Self {
+            header: Png::STANDARD_HEADER,
+            chunks,
+        }
     }
 
     pub fn append_chunk(&mut self, chunk: Chunk) {
@@ -36,7 +39,15 @@ impl Png {
     }
 
     pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
-        todo!()
+        let chunk_type_bytes = chunk_type.as_bytes();
+
+        let mut res: Option<&Chunk> = None;
+        for c in &self.chunks {
+            if c.chunk_type().bytes() == chunk_type_bytes {
+                res = Some(c);
+            }
+        }
+        res
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
