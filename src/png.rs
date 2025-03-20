@@ -80,7 +80,11 @@ impl TryFrom<&[u8]> for Png {
 
 impl Display for Png {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        writeln!(f, "Header: {:?}\nChunks:", self.header)?;
+        for c in &self.chunks {
+            writeln!(f, "{}", c)?;
+        }
+        Ok(())
     }
 }
 
