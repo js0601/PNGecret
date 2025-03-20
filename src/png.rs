@@ -23,7 +23,7 @@ impl Png {
     }
 
     pub fn append_chunk(&mut self, chunk: Chunk) {
-        todo!()
+        self.chunks.push(chunk);
     }
 
     pub fn remove_first_chunk(&mut self, chunk_type: &str) -> crate::Result<Chunk> {
