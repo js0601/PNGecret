@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use crate::Result;
-use crate::args::EncodeArgs;
+use crate::args::{DecodeArgs, EncodeArgs};
 use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
 use crate::png::Png;
@@ -30,13 +30,19 @@ pub fn encode(args: EncodeArgs) -> Result<()> {
     Ok(())
 }
 
-// this needs to:
-// 1. handle input file (see encode)
-// 2. turn chunk_type into ChunkType
-// 3. find chunk of type chunk_type in Png
-// 4. output message inside of data field of chunk
-fn decode(file: PathBuf, chunk_type: String) {
-    todo!()
+pub fn decode(args: DecodeArgs) -> Result<()> {
+    // read file as bytes and turn it into PNG struct
+    let img_bytes = read(&args.file)?;
+    let png = Png::try_from(img_bytes.as_slice())?;
+
+    // find chunk in png and print data
+    if let Some(chunk) = png.chunk_by_type(&args.chunk_type) {
+        println!("{}", chunk.data_as_string()?);
+    } else {
+        println!("No chunk of given type found!");
+    }
+
+    Ok(())
 }
 
 // this needs to:
