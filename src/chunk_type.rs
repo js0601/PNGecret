@@ -11,7 +11,7 @@ pub struct ChunkType {
 // the 5th bit of every byte has a specific meaning
 // this could be checked by checking if the byte is an uppercase (bit 5 is 0)
 // or lowercase (bit 5 is 1) ASCII char, but the spec says that's incorrect to do so I check the bits manually
-#[allow(dead_code)] // NOTE: needed?
+#[allow(dead_code)]
 impl ChunkType {
     pub fn bytes(&self) -> [u8; 4] {
         self.bytes

@@ -1,5 +1,4 @@
 use std::fs::{read, write};
-use std::path::PathBuf;
 use std::str::FromStr;
 
 use crate::Result;
@@ -60,9 +59,6 @@ pub fn remove(args: RemoveArgs) -> Result<()> {
     Ok(())
 }
 
-// this needs to:
-// 1. handle input file (see above)
-// 2. print every chunk in Png (make Display nicer for chunks)
 pub fn print(args: PrintArgs) -> Result<()> {
     // read file as bytes and turn it into PNG struct
     let img_bytes = read(&args.file)?;

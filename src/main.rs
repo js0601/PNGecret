@@ -1,4 +1,4 @@
-use args::{Cli, RemoveArgs};
+use args::Cli;
 use clap::Parser;
 use command::*;
 
