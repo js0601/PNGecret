@@ -27,39 +27,39 @@ pub enum PngecretArgs {
 #[derive(Parser, Debug)]
 pub struct EncodeArgs {
     /// PNG file to hide message in
-    file: PathBuf,
+    pub file: PathBuf,
 
     /// Chunk Type where message is hidden  
     /// (for more info, look at the PNG structure doc)
-    chunk_type: String,
+    pub chunk_type: String,
 
     /// Message to hide
-    msg: String,
+    pub msg: String,
 
     /// Optional output file
-    output: Option<PathBuf>,
+    pub output: Option<PathBuf>,
 }
 
 #[derive(Parser, Debug)]
 pub struct DecodeArgs {
     /// PNG file to decode hidden message from
-    file: PathBuf,
+    pub file: PathBuf,
 
     /// Type of chunk the message is hidden in
-    chunk_type: String,
+    pub chunk_type: String,
 }
 
 #[derive(Parser, Debug)]
 pub struct RemoveArgs {
     /// PNG file to remove message from
-    file: PathBuf,
+    pub file: PathBuf,
 
     /// Type of chunk the message is hidden in
-    chunk_type: String,
+    pub chunk_type: String,
 }
 
 #[derive(Parser, Debug)]
 pub struct PrintArgs {
     /// PNG file to print
-    file: PathBuf,
+    pub file: PathBuf,
 }
