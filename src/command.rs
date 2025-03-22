@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use crate::Result;
-use crate::args::{DecodeArgs, EncodeArgs};
+use crate::args::{DecodeArgs, EncodeArgs, RemoveArgs};
 use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
 use crate::png::Png;
@@ -45,11 +45,19 @@ pub fn decode(args: DecodeArgs) -> Result<()> {
     Ok(())
 }
 
-// this needs to:
-// same as above
-// instead of finding and outputting chunk, remove chunk from Png
-fn remove(file: PathBuf, chunk_type: String) {
-    todo!()
+pub fn remove(args: RemoveArgs) -> Result<()> {
+    // read file as bytes and turn it into PNG struct
+    let img_bytes = read(&args.file)?;
+    let mut png = Png::try_from(img_bytes.as_slice())?;
+
+    // find chunk in png and remove it
+    let removed_chunk = png.remove_first_chunk(&args.chunk_type)?;
+    println!("Removed chunk: {}", removed_chunk);
+
+    // write changes
+    write(args.file, png.as_bytes())?;
+
+    Ok(())
 }
 
 // this needs to:
