@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use crate::Result;
-use crate::args::{DecodeArgs, EncodeArgs, RemoveArgs};
+use crate::args::{DecodeArgs, EncodeArgs, PrintArgs, RemoveArgs};
 use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
 use crate::png::Png;
@@ -63,6 +63,13 @@ pub fn remove(args: RemoveArgs) -> Result<()> {
 // this needs to:
 // 1. handle input file (see above)
 // 2. print every chunk in Png (make Display nicer for chunks)
-fn print(file: PathBuf) {
-    todo!()
+pub fn print(args: PrintArgs) -> Result<()> {
+    // read file as bytes and turn it into PNG struct
+    let img_bytes = read(&args.file)?;
+    let png = Png::try_from(img_bytes.as_slice())?;
+
+    // print chunks
+    println!("{}", png);
+
+    Ok(())
 }
