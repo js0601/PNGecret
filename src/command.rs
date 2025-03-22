@@ -1,19 +1,33 @@
+use std::fs::{read, write};
 use std::path::PathBuf;
+use std::str::FromStr;
 
-// this needs to:
-// 1. handle input file
-//    - find file
-//    - turn file into [u8]
-//    - turn it into Png struct
-// 2. build new chunk
-//    - turn chunk_type into ChunkType
-//    - turn msg into [u8]
-//    - build Chunk from these two
-// 3. add new chunk to Png
-// 4. save Png with new chunk into file
-//    - optionally save it into output file instead
-fn encode(file: PathBuf, chunk_type: String, msg: String, output: Option<PathBuf>) {
-    todo!()
+use crate::Result;
+use crate::args::EncodeArgs;
+use crate::chunk::Chunk;
+use crate::chunk_type::ChunkType;
+use crate::png::Png;
+
+pub fn encode(args: EncodeArgs) -> Result<()> {
+    // read file as bytes and turn it into PNG struct
+    let img_bytes = read(&args.file)?;
+    let mut png = Png::try_from(img_bytes.as_slice())?;
+
+    // build new chunk
+    let chunk_type = ChunkType::from_str(&args.chunk_type)?;
+    let chunk = Chunk::new(chunk_type, args.msg.as_bytes().to_vec());
+
+    // append chunk to png
+    png.append_chunk(chunk);
+
+    // save modified png into file
+    if let Some(f) = args.output {
+        write(f, png.as_bytes())?;
+    } else {
+        write(args.file, png.as_bytes())?;
+    }
+
+    Ok(())
 }
 
 // this needs to:
