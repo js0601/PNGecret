@@ -27,10 +27,8 @@ const SYMBOLS: [char; 106] = [
 /// takes a string and turns it into vec of corresponding numbers
 fn string_to_numbers(s: &str) -> Result<Vec<u8>> {
     let mut vals: Vec<u8> = Vec::new();
-    let mut symbol_iter = SYMBOLS.iter();
     for c in s.chars() {
-        // let pos = symbol_iter.position(|x| *x == c);
-        if let Some(idx) = symbol_iter.position(|x| *x == c) {
+        if let Some(idx) = SYMBOLS.iter().position(|x| *x == c) {
             // NOTE: panics if more than 255 symbols in SYMBOLS
             vals.push(idx.try_into().unwrap());
         } else {
@@ -76,3 +74,31 @@ impl Display for CryptoError {
 }
 
 impl Error for CryptoError {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_string_to_numbers() {
+        let actual = string_to_numbers("Hello World!").unwrap();
+        let expected = vec![33, 4, 11, 11, 14, 105, 48, 14, 17, 11, 3, 68];
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_unknown_char() {
+        let result = string_to_numbers("é");
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_numbers_to_string() {
+        let actual = numbers_to_string(vec![33, 4, 11, 11, 14, 105, 48, 14, 17, 11, 3, 68]);
+        let expected = "Hello World!";
+
+        assert_eq!(actual, expected);
+    }
+}
