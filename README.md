@@ -7,27 +7,27 @@ A command line tool to hide messages in PNG files
 
 Encode a secret message in test.png in a chunk with type TeST:
 
-´´´
+```
 pngecret encode test.png TeST "secret message"
-´´´
+```
 
 Decode the secret message:
 
-´´´
+```
 pngecret decode test.png TeST
-´´´
+```
 
 Remove the secret message:
 
-´´´
+```
 pngecret remove test.png TeST
-´´´
+```
 
 Print all chunks in a PNG file:
 
-´´´
+```
 pngecret print test.png
-´´´
+```
 
 
 ### Resources
