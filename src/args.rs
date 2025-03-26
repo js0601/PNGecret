@@ -36,7 +36,12 @@ pub struct EncodeArgs {
     /// Message to hide
     pub msg: String,
 
+    /// Encrypt the message using a passphrase
+    #[arg(short, long, value_name = "PASSPHRASE")]
+    pub encrypt: Option<String>,
+
     /// Optional output file
+    #[arg(short, long, value_name = "OUTPUT FILE")]
     pub output: Option<PathBuf>,
 }
 
@@ -47,6 +52,10 @@ pub struct DecodeArgs {
 
     /// Type of chunk the message is hidden in
     pub chunk_type: String,
+
+    /// Decrypt the message using a passphrase
+    #[arg(short, long, value_name = "PASSPHRASE")]
+    pub decrypt: Option<String>,
 }
 
 #[derive(Parser, Debug)]
