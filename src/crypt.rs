@@ -1,7 +1,6 @@
 // https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher
 // needed:
 // list of values (a-z, A-Z, 0-9, symbols, space)
-// enumerate this list
 // get msg and passphrase, extend passphrase to length of msg
 // turn both msg and extended passphrase into numbers, using enumerated list
 // add every number in passphrase to corresponding number in msg (with wrap around)
@@ -47,8 +46,22 @@ fn numbers_to_string(vals: Vec<u8>) -> String {
     s
 }
 
-pub fn encrypt(msg: String, pass: String) -> Result<String> {
-    todo!()
+/// encrypt msg using pass and return encrypted msg
+pub fn encrypt(msg: &str, pass: &str) -> Result<String> {
+    let msg_vals = string_to_numbers(msg)?;
+    let pass_vals = string_to_numbers(pass)?;
+    let mut encrypted_msg_vals = Vec::new();
+
+    // use pass_idx to repeatedly iterate over pass_vals
+    let mut pass_idx = 0;
+    for v in msg_vals {
+        // NOTE: if SYMBOLS has more than 255 chars this panics
+        encrypted_msg_vals.push((v + pass_vals[pass_idx]) % SYMBOLS.len() as u8);
+        // update pass_idx
+        pass_idx = (pass_idx + 1) % pass_vals.len();
+    }
+
+    Ok(numbers_to_string(encrypted_msg_vals))
 }
 
 pub fn decrypt(msg: String, pass: String) -> Result<String> {
@@ -98,6 +111,14 @@ mod tests {
     fn test_numbers_to_string() {
         let actual = numbers_to_string(vec![33, 4, 11, 11, 14, 105, 48, 14, 17, 11, 3, 68]);
         let expected = "Hello World!";
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_encrypt() {
+        let actual = encrypt("Hello World!", "password").unwrap();
+        let expected = "WeDDKn9rGlv´";
 
         assert_eq!(actual, expected);
     }
