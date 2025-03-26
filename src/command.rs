@@ -5,6 +5,7 @@ use crate::Result;
 use crate::args::{DecodeArgs, EncodeArgs, PrintArgs, RemoveArgs};
 use crate::chunk::Chunk;
 use crate::chunk_type::ChunkType;
+use crate::crypt::{decrypt, encrypt};
 use crate::png::Png;
 
 pub fn encode(args: EncodeArgs) -> Result<()> {
@@ -12,9 +13,17 @@ pub fn encode(args: EncodeArgs) -> Result<()> {
     let img_bytes = read(&args.file)?;
     let mut png = Png::try_from(img_bytes.as_slice())?;
 
+    // optionally encrypt the message
+    let msg;
+    if let Some(pass) = args.encrypt {
+        msg = encrypt(&args.msg, &pass)?;
+    } else {
+        msg = args.msg;
+    }
+
     // build new chunk
     let chunk_type = ChunkType::from_str(&args.chunk_type)?;
-    let chunk = Chunk::new(chunk_type, args.msg.as_bytes().to_vec());
+    let chunk = Chunk::new(chunk_type, msg.as_bytes().to_vec());
 
     // append chunk to png
     png.append_chunk(chunk);
