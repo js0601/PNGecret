@@ -55,7 +55,7 @@ pub fn encrypt(msg: &str, pass: &str) -> Result<String> {
     // use pass_idx to repeatedly iterate over pass_vals
     let mut pass_idx = 0;
     for v in msg_vals {
-        // NOTE: if SYMBOLS has more than 255 chars this panics
+        // NOTE: if SYMBOLS has more than 255 chars this panics, change u8
         encrypted_msg_vals.push((v + pass_vals[pass_idx]) % SYMBOLS.len() as u8);
         // update pass_idx
         pass_idx = (pass_idx + 1) % pass_vals.len();
@@ -64,8 +64,27 @@ pub fn encrypt(msg: &str, pass: &str) -> Result<String> {
     Ok(numbers_to_string(encrypted_msg_vals))
 }
 
-pub fn decrypt(msg: String, pass: String) -> Result<String> {
-    todo!()
+pub fn decrypt(msg: &str, pass: &str) -> Result<String> {
+    let msg_vals = string_to_numbers(msg)?;
+    let pass_vals = string_to_numbers(pass)?;
+    let mut encrypted_msg_vals = Vec::new();
+
+    // use pass_idx to repeatedly iterate over pass_vals
+    let mut pass_idx = 0;
+    for v in msg_vals {
+        // NOTE: if SYMBOLS has more than 255 chars this panics, change u8
+        // not very pretty? but works
+        // basically see if subtraction would overflow, if yes subtract (u8::MAX - SYMBOLS.len()+1) from result
+        if let (n, true) = v.overflowing_sub(pass_vals[pass_idx]) {
+            encrypted_msg_vals.push(n - (u8::MAX - SYMBOLS.len() as u8 + 1));
+        } else {
+            encrypted_msg_vals.push((v - pass_vals[pass_idx]) % SYMBOLS.len() as u8);
+        }
+        // update pass_idx
+        pass_idx = (pass_idx + 1) % pass_vals.len();
+    }
+
+    Ok(numbers_to_string(encrypted_msg_vals))
 }
 
 #[derive(Debug)]
@@ -119,6 +138,14 @@ mod tests {
     fn test_encrypt() {
         let actual = encrypt("Hello World!", "password").unwrap();
         let expected = "WeDDKn9rGlv´";
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_decrypt() {
+        let actual = decrypt("WeDDKn9rGlv´", "password").unwrap();
+        let expected = "Hello World!";
 
         assert_eq!(actual, expected);
     }
