@@ -45,7 +45,13 @@ pub fn decode(args: DecodeArgs) -> Result<()> {
 
     // find chunk in png and print data
     if let Some(chunk) = png.chunk_by_type(&args.chunk_type) {
-        println!("{}", chunk.data_as_string()?);
+        // decrypt with passphrase if given
+        let msg = chunk.data_as_string()?;
+        if let Some(pass) = args.decrypt {
+            println!("{}", decrypt(&msg, &pass)?);
+        } else {
+            println!("{msg}");
+        }
     } else {
         println!("No chunk of given type found!");
     }
