@@ -5,6 +5,8 @@ A command line tool to hide messages in PNG files
 
 ## Usage
 
+#### Encode
+
 Encode a secret message in test.png in a chunk with type TeST:
 
 ```
@@ -26,6 +28,8 @@ pngecret encode test.png TeST "message" -o testsecret.png
 ```
 
 
+#### Decode
+
 Decode the message in the chunk of type TeST:
 
 ```
@@ -40,12 +44,16 @@ pngecret decode test.png TeST -d "passphrase"
 ```
 
 
+#### Remove
+
 Remove the secret message:
 
 ```
 pngecret remove test.png TeST
 ```
 
+
+#### Print
 
 Print all chunks in a PNG file:
 
