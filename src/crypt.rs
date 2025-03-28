@@ -1,13 +1,3 @@
-// https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher
-// needed:
-// list of values (a-z, A-Z, 0-9, symbols, space)
-// get msg and passphrase, extend passphrase to length of msg
-// turn both msg and extended passphrase into numbers, using enumerated list
-// add every number in passphrase to corresponding number in msg (with wrap around)
-// turn modified msg back to "normal" using list and return it
-//
-// decrypt by doing same thing, but subtracting
-
 use std::{error::Error, fmt::Display};
 
 use crate::Result;
